@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vok Pets Resort/Precios </title>
+    <script defer src="{{ url_for('static', filename='js/login_registro.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-left">
+          <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">Bienvenido</a>
+          <a href="/contacto" class="nav-link {% if active_page == 'contacto' %}active{% endif %}">Contácto</a>
+          <a href="/precios" class="nav-link {% if active_page == 'precios' %}active{% endif %}">Servicios</a>
+          <a href="/ayuda" class="nav-link {% if active_page == 'ayuda' %}active{% endif %}">Ayuda</a>
+        </div>
+        <div class="navbar-center1">
+          <h1 class="logo">VOK PETS RESORT</h1>
+        </div>
+        <div class="navbar-right">
+        </div>
+      </header>
+    
+    <section id="servicios" class="servicios">
+        <h2>Servicios</h2>
+        <div class="servicios-container">
+          <div class="servicio-item">
+            <img src="https://images.squarespace-cdn.com/content/v1/5d1d4e508e724e000159608f/1594612598316-5UKHAY62S20ODPST8AQF/_MG_9646.jpg?format=2500w" alt="Hotel">
+            <h3>Hotel</h3>
+            <p>Un servicio completo de cuidado y estadía para tu perro, asegurando que duerma y se sienta bien.</p>
+          </div>
+          <div class="servicio-item">
+            <img src="https://irp.cdn-website.com/ffc28edd/dms3rep/multi/De-la-belleza-a-la-salud-2.jpeg" alt="Grooming">
+            <h3>Grooming Profesional</h3>
+            <p>Un servicio completo de cuidado y baño para tu perro, asegurando que siempre se vea y se sienta bien.</p>
+          </div>
+          <div class="servicio-item">
+            <img src="https://static.mansionglobal.com/production/media/article-images/0d591586cdbb1f8b4001b6e23b3e64d7/large_MiMA-Dog-City-courtesy-of-Scott-Francis-for-Related-Cos.jpg" alt="Daycare">
+            <h3>Guardería Canina</h3>
+            <p>Un espacio seguro y divertido para que tu perro socialice mientras estás fuera. ¡Diversión garantizada!</p>
+          </div>
+          <div class="servicio-item">
+            <img src="https://escuelafarmacia.com/wp-content/uploads/cl%C3%ADnica-veterinaria.jpg" alt="Veterinaria">
+            <h3>Veterinaria Profesional</h3>
+            <p>Cuidado y tratamiento especial y personalizado para las características específicas de tu mascota.</p>
+          </div>
+        </div>
+      </section> 
+      
+      <section id="paquetes" class="paquetes">
+        <h2>Paquetes Especiales</h2>
+        <div class="paquetes-container">
+      
+          <div class="paquete-item">
+            <h3>Paquete Básico</h3>
+            <p class="precio">$29.99</p>
+            <p>Incluye baño, corte de uñas y limpieza básica para tu perro. Ideal para mantenimiento mensual.</p>
+            <a href="https://wa.me/50686601331?text=Hola!%20Quisiera%20contratar%20el%20Paquete%20Básico" class="btn-contratar" target="_blank">¡Contratar Ahora!</a>
+          </div>
+      
+          <div class="paquete-item">
+            <h3>Paquete Premium</h3>
+            <p class="precio">$59.99</p>
+            <p>Todo lo del básico + grooming profesional, tratamiento antipulgas y revisión veterinaria.</p>
+            <a href="https://wa.me/50686601331?text=Hola!%20Estoy%20interesado%20en%20el%20Paquete%20Premium" class="btn-contratar" target="_blank">¡Contratar Ahora!</a>
+          </div>
+      
+          <div class="paquete-item">
+            <h3>Paquete VIP</h3>
+            <p class="precio">$99.99</p>
+            <p>Incluye todo lo anterior + estadía de 1 noche en hotel, sesión de fotos y obsequio sorpresa.</p>
+            <a href="https://wa.me/50686601331?text=Hola!%20Quisiera%20contratar%20el%20Paquete%20VIP" class="btn-contratar" target="_blank">¡Contratar Ahora!</a>
+          </div>
+      
+        </div>
+      </section>
+      
+</body>
+</html>

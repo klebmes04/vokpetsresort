@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voks Pet Resort - Ayuda</title>
+    <script defer src="{{ url_for('static', filename='js/login_registro.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-left">
+            <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">Bienvenido</a>
+            <a href="/contacto" class="nav-link {% if active_page == 'contacto' %}active{% endif %}">Contácto</a>
+            <a href="/precios" class="nav-link {% if active_page == 'precios' %}active{% endif %}">Servicios</a>
+            <a href="/ayuda" class="nav-link {% if active_page == 'ayuda' %}active{% endif %}">Ayuda</a>
+        </div>
+        <div class="navbar-center1">
+            <h1 class="logo">VOK PETS RESORT</h1>
+        </div>
+        <div class="navbar-right">
+            <a href="https://www.instagram.com/vokpetsresort?igsh=anltb25naDg5cG91" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+        </div>
+    </header>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            Asistente Virtual - Vok Pets Resort
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Mensaje de bienvenida se agrega por JS -->
+        </div>
+        <div class="chat-input">
+        <div style="display: flex; align-items: center;">
+                <input id="inputText" type="text" placeholder="Escribe tu mensaje aquí..." style="flex:1; margin-right:8px;" />
+                <!-- Botón para subir imagen existente -->
+                <label for="inputFile" class="image-upload-label" style="margin:0;">
+                    <span class="image-upload-circle" title="Subir imagen">
+                        <i class="fa fa-image"></i>
+                    </span>
+                </label>
+                <input id="inputFile" type="file" accept="image/*" style="display:none;" />
+                <!-- Botón para tomar foto -->
+                <label for="inputCamera" class="image-upload-label" style="margin:0;">
+                    <span class="image-upload-circle" title="Tomar foto">
+                        <i class="fa fa-camera"></i>
+                    </span>
+                </label>
+                <input id="inputCamera" type="file" accept="image/*" capture="environment" style="display:none;" />
+                    <button id="generateButton">Enviar</button>
+                </div>
+            <div style="margin-top:8px; text-align:right;">
+                <span id="imageReadyNotice" style="display:none; color:#4caf50; font-size:18px; margin-left:8px; vertical-align:middle;">
+                    <i class="fa fa-check-circle"></i> Imagen lista para enviar
+                </span>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Aviso de imagen lista -->
+    <div id="imageReadyNotice" style="display:none; color:#4caf50; font-weight:bold; text-align:center; margin-top:10px;">
+        <i class="fa fa-check-circle"></i> Imagen lista para enviar
+    </div>
+
+    <!-- Importar la librería para Google Generative AI -->
+    <script type="importmap">
+        {
+          "imports": {
+            "@google/generative-ai": "https://cdn.jsdelivr.net/npm/@google/generative-ai/+esm"
+          }
+        }
+    </script>
+
+    <script type="module">
+                // Mostrar mensaje de bienvenida con retardo de 3 segundos
+                window.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(function() {
+                                const chatMessages = document.getElementById('chatMessages');
+                                chatMessages.innerHTML += `
+                                    <div class="message bot" style="background:#e0f7fa; color:#333;">
+                                        ¡Hola! 👋 Soy el asistente virtual de Vok Pets Resort.<br>
+                                        Puedo ayudarte con información sobre nuestros servicios, precios, instalaciones, consejos de cuidado animal, reservas y cualquier duda sobre tu mascota.<br>
+                                        También puedes subir una foto para recibir orientación personalizada. ¿En qué puedo ayudarte hoy?
+                                    </div>
+                                `;
+                        }, 1000);
+                });
+        import { GoogleGenerativeAI } from "@google/generative-ai";
+
+        const API_KEY = "AIzaSyBoYZDnZVWDRufD50pb0vDcyyV5cBlLHf0";
+        const genAI = new GoogleGenerativeAI(API_KEY);
+
+        // Mostrar aviso cuando se selecciona/toma una imagen
+        document.getElementById("inputFile").addEventListener("change", function() {
+            if (this.files.length) {
+                document.getElementById("imageReadyNotice").style.display = "inline-block";
+            } else {
+                document.getElementById("imageReadyNotice").style.display = "none";
+            }
+        });
+        document.getElementById("inputCamera").addEventListener("change", function() {
+            if (this.files.length) {
+                document.getElementById("imageReadyNotice").style.display = "inline-block";
+            } else {
+                document.getElementById("imageReadyNotice").style.display = "none";
+            }
+        });
+
+        // Animación de tres puntitos mientras la IA responde
+        function showTypingAnimation() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingAnimation';
+            typingDiv.innerHTML = '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        function hideTypingAnimation() {
+            const typingDiv = document.getElementById('typingAnimation');
+            if (typingDiv) typingDiv.remove();
+        }
+
+        async function handleUserMessage() {
+            const inputText = document.getElementById("inputText");
+            const inputFile = document.getElementById("inputFile");
+            const inputCamera = document.getElementById("inputCamera");
+            const chatMessages = document.getElementById("chatMessages");
+            const userMessage = inputText.value.trim();
+
+            if (!userMessage && !inputFile.files.length && !inputCamera.files.length) return;
+
+            // Historial de la conversación
+            if (!window.conversationHistory) {
+                window.conversationHistory = [];
+            }
+
+            // Agregar mensaje del usuario al historial
+            if (userMessage) {
+                window.conversationHistory.push({ role: "user", content: userMessage });
+                chatMessages.innerHTML += `
+                    <div class="message user">${userMessage}</div>
+                `;
+                inputText.value = ""; // Limpiar el cuadro de texto
+            }
+
+            // Guardar el último análisis de imagen en window.lastImageAnalysis
+            let analysisResult = "";
+            if (!window.lastImageAnalysis) window.lastImageAnalysis = "";
+            // Agregar imagen si se seleccionó desde archivo
+            if (inputFile.files.length) {
+                const file = inputFile.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    chatMessages.innerHTML += `
+                        <div class="message user">
+                            <img src="${e.target.result}" alt="Imagen subida por el usuario" style="max-width:100%; border-radius:10px;" />
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+                inputFile.value = ""; // Limpiar el campo de archivo
+
+                // Analizar la imagen
+                analysisResult = await analyzeImage(file);
+                window.lastImageAnalysis = analysisResult;
+                window.conversationHistory.push({ role: "user", content: analysisResult });
+            }
+            // Agregar imagen si se tomó desde la cámara
+            if (inputCamera.files.length) {
+                const file = inputCamera.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    chatMessages.innerHTML += `
+                        <div class="message user">
+                            <img src="${e.target.result}" alt="Foto tomada por el usuario" style="max-width:100%; border-radius:10px;" />
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+                inputCamera.value = ""; // Limpiar el campo de archivo
+
+                // Analizar la imagen
+                analysisResult = await analyzeImage(file);
+                window.lastImageAnalysis = analysisResult;
+                window.conversationHistory.push({ role: "user", content: analysisResult });
+            }
+
+            showTypingAnimation();
+            try {
+                const model = genAI.getGenerativeModel({
+                    model: "gemini-2.0-flash",
+                    maxTokens: 100
+                });
+
+                // Al construir el contexto para la IA, siempre incluye el último análisis de imagen si existe
+                const instruction = "Eres un asistente virtual profesional y carismático de Vok Pets Resort. Responde con amabilidad y empatía a preguntas sobre mascotas, servicios y salud animal. Sé cálido, cercano y usa emojis para transmitir alegría. No repitas frases en respuestas siguientes. Si el tema no es sobre mascotas, redirige amablemente. Evita respuestas frías o impersonales. No uses asteriscos ni formato markdown. Responde de forma variada y personalizada. Ten en cuenta el historial de la conversación para dar respuestas coherentes y con continuidad. Si el usuario ha enviado una imagen, utiliza el análisis para responder.";
+                let contents = [{ role: "user", parts: [{ text: instruction }] }];
+                if (window.lastImageAnalysis) {
+                    contents.push({ role: "user", parts: [{ text: window.lastImageAnalysis }] });
+                }
+                window.conversationHistory.forEach(msg => {
+                    contents.push({ role: msg.role, parts: [{ text: msg.content }] });
+                });
+
+                const result = await model.generateContent({ contents });
+                hideTypingAnimation();
+
+                window.conversationHistory.push({ role: "model", content: result.response.text() });
+                chatMessages.innerHTML += `
+                    <div class="message bot">${result.response.text() || "No se pudo generar una respuesta."}</div>
+                `;
+                // Hacer scroll automático al final del chat
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (error) {
+                hideTypingAnimation();
+                console.error("Error al generar contenido:", error);
+                chatMessages.innerHTML += `
+                    <div class="message bot">Hubo un error al conectar con el API.</div>
+                `;
+            }
+
+            // Ocultar aviso al enviar mensaje
+            document.getElementById("imageReadyNotice").style.display = "none";
+        }
+
+        async function analyzeImage(file) {
+            // Convertir la imagen a base64
+            const reader = new FileReader();
+            const base64Image = await new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result.split(",")[1]); // Obtener solo la parte base64
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+
+            // Enviar la imagen al backend Flask
+            try {
+                const response = await fetch("/analyze-image", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ image: base64Image }),
+                });
+                const data = await response.json();
+                return data.result || "No se pudo analizar la imagen.";
+            } catch (error) {
+                console.error("Error al analizar la imagen:", error);
+                return "Hubo un error al analizar la imagen.";
+            }
+        }
+
+        document.getElementById("generateButton").addEventListener("click", handleUserMessage);
+        document.getElementById("inputText").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") handleUserMessage();
+        });
+
+        // CSS para la animación
+        const style = document.createElement('style');
+        style.innerHTML = `
+        .typing-dots {
+          display: inline-block;
+          font-size: 22px;
+          letter-spacing: 2px;
+          animation: blink 1.2s infinite;
+        }
+        .typing-dots span {
+          opacity: 0.3;
+          animation: blink 1.2s infinite;
+        }
+        .typing-dots span:nth-child(1) { animation-delay: 0s; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.3s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.6s; }
+        @keyframes blink {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
