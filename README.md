@@ -1,2 +1,0 @@
-# vokpetsresort
-hotel para perros
